@@ -88,9 +88,9 @@ const heroSlides = [
 const homeHeroSlides = [
   {
     image:
-      "https://images.pexels.com/photos/5721386/pexels-photo-5721386.jpeg?auto=compress&cs=tinysrgb&w=1800",
-    fallback: heroHealthcareFallbackImage,
-    alt: "Kenyan healthcare professional celebrating a new Gulf opportunity",
+      "https://images.pexels.com/photos/36505864/pexels-photo-36505864.jpeg?auto=compress&cs=tinysrgb&w=1800",
+    fallback: aboutWorkFallbackImage,
+    alt: "Black professional chef preparing a dish in a modern commercial kitchen",
   },
   {
     image:
@@ -106,9 +106,9 @@ const homeHeroSlides = [
   },
   {
     image:
-      "https://images.pexels.com/photos/36505864/pexels-photo-36505864.jpeg?auto=compress&cs=tinysrgb&w=1800",
-    fallback: aboutWorkFallbackImage,
-    alt: "Black professional chef preparing a dish in a modern commercial kitchen",
+      "https://images.pexels.com/photos/5721386/pexels-photo-5721386.jpeg?auto=compress&cs=tinysrgb&w=1800",
+    fallback: heroHealthcareFallbackImage,
+    alt: "Kenyan healthcare professional celebrating a new Gulf opportunity",
   },
 ];
 
@@ -116,8 +116,19 @@ const stats = [
   { value: "10,000+", label: "Successful placements" },
   { value: "500+", label: "Verified employers" },
   { value: "98%", label: "Visa success rate" },
-  { value: "12+", label: "Years of experience" },
+  { value: "7+", label: "Years of experience" },
 ];
+
+function StatValue({ value }: { value: string }) {
+  const hasPlus = value.endsWith("+");
+
+  return (
+    <span>
+      {hasPlus ? value.slice(0, -1) : value}
+      {hasPlus ? <span className="text-emerald-600">+</span> : null}
+    </span>
+  );
+}
 
 const employers = [
   {
@@ -580,14 +591,7 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
       <Nav />
       {children}
       <Footer />
-      <BackToTopButton />
-      <a
-        href={whatsappUrl("Hello NICKS, I would like help finding a verified Gulf job.")}
-        className="fixed bottom-5 right-5 z-50 inline-flex size-14 items-center justify-center rounded-md bg-primary text-white shadow-elegant transition hover:-translate-y-1 hover:bg-primary-deep"
-        aria-label="Chat with NICKS on WhatsApp"
-      >
-        <WhatsAppIcon className="size-6" />
-      </a>
+      <FloatingActions />
     </div>
   );
 }
@@ -626,14 +630,14 @@ function Nav() {
                   </button>
                 </div>
                 <div
-                  className={`absolute right-0 top-full z-50 min-w-52 border-2 border-accent-gold bg-white p-2 text-primary-deep shadow-gold transition ${
+                  className={`absolute right-0 top-full z-50 min-w-52 border-2 border-accent-gold bg-white p-2 text-primary-deep shadow-gold transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 ${
                     openMenu === item.href
                       ? "visible translate-y-0 opacity-100"
                       : "invisible translate-y-2 opacity-0"
                   }`}
                   role="menu"
                 >
-                  {item.children.map((child) => (
+                  {[{ label: item.label, href: item.href }, ...item.children].map((child) => (
                     <a
                       key={child.href}
                       href={child.href}
@@ -699,7 +703,6 @@ function Nav() {
                 className="flex items-center justify-between rounded-md px-4 py-3 text-sm font-black uppercase tracking-[0.08em] transition hover:bg-lavender"
               >
                 {item.label}
-                <ArrowRight className="size-4" />
               </a>
               {"children" in item
                 ? item.children.map((child) => (
@@ -707,7 +710,7 @@ function Nav() {
                       key={child.href}
                       href={child.href}
                       onClick={() => setOpenMenu(null)}
-                      className="ml-4 block rounded-md px-4 py-2 text-sm font-bold text-primary-deep/70 transition hover:bg-lavender hover:text-primary"
+                      className="ml-4 block rounded-md px-4 py-2 text-sm font-black uppercase tracking-[0.08em] text-primary-deep transition hover:bg-lavender hover:text-primary"
                     >
                       {child.label}
                     </a>
@@ -721,31 +724,57 @@ function Nav() {
   );
 }
 
-function BackToTopButton() {
-  const [isVisible, setIsVisible] = useState(false);
+function FloatingActions() {
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [footerIsVisible, setFooterIsVisible] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setIsVisible(window.scrollY > 420);
+    const handleScroll = () => setShowBackToTop(window.scrollY > 420);
+    const footer = document.querySelector("[data-site-footer]");
+    const observer = footer
+      ? new IntersectionObserver(([entry]) => setFooterIsVisible(entry.isIntersecting), {
+          threshold: 0.01,
+        })
+      : null;
 
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
+    if (footer && observer) observer.observe(footer);
 
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      observer?.disconnect();
+    };
   }, []);
 
   return (
-    <button
-      type="button"
-      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      className={`fixed bottom-24 right-5 z-50 inline-flex size-12 items-center justify-center rounded-md bg-primary text-white shadow-elegant transition duration-300 hover:-translate-y-1 hover:bg-primary-deep focus:outline-none focus:ring-4 focus:ring-primary/20 ${
-        isVisible
-          ? "pointer-events-auto translate-y-0 opacity-100"
-          : "pointer-events-none translate-y-3 opacity-0"
+    <div
+      className={`fixed bottom-5 right-5 z-50 flex flex-col-reverse items-end gap-3 transition duration-300 ${
+        footerIsVisible
+          ? "pointer-events-none translate-y-4 opacity-0"
+          : "translate-y-0 opacity-100"
       }`}
-      aria-label="Back to top"
     >
-      <ArrowUp className="size-5" strokeWidth={3} />
-    </button>
+      <a
+        href={whatsappUrl("Hello NICKS, I would like help finding a verified Gulf job.")}
+        className="inline-flex size-14 items-center justify-center rounded-md bg-primary text-white shadow-elegant transition hover:-translate-y-1 hover:bg-primary-deep"
+        aria-label="Chat with NICKS on WhatsApp"
+      >
+        <WhatsAppIcon className="size-6" />
+      </a>
+      <button
+        type="button"
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        className={`inline-flex size-12 items-center justify-center rounded-md bg-primary text-white shadow-elegant transition duration-300 hover:-translate-y-1 hover:bg-primary-deep focus:outline-none focus:ring-4 focus:ring-primary/20 ${
+          showBackToTop
+            ? "pointer-events-auto translate-y-0 opacity-100"
+            : "pointer-events-none translate-y-3 opacity-0"
+        }`}
+        aria-label="Back to top"
+      >
+        <ArrowUp className="size-5" strokeWidth={3} />
+      </button>
+    </div>
   );
 }
 
@@ -1240,18 +1269,18 @@ function RoleCategories() {
             <ArrowRight className="size-4" />
           </a>
         </div>
-        <div className="grid gap-px overflow-hidden border border-white/15 bg-white/15 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 sm:gap-px sm:overflow-hidden sm:border sm:border-white/15 sm:bg-white/15 lg:grid-cols-4">
           {categories.map((category) => {
             const Icon = category.icon;
             return (
               <a
                 key={category.label}
                 href="/jobs"
-                className="group bg-primary-deep/90 p-6 backdrop-blur-[1px] transition hover:bg-white hover:text-primary-deep"
+                className="group border border-white/20 bg-primary-deep/55 p-6 backdrop-blur-[1px] transition hover:bg-white hover:text-primary-deep sm:border-0 sm:bg-primary-deep/70"
               >
                 <Icon className="size-7 text-accent-gold transition group-hover:text-accent-red" />
                 <h3 className="mt-8 font-display text-2xl font-bold">{category.label}</h3>
-                <p className="mt-2 text-sm text-white/55 transition group-hover:text-primary-deep/60">
+                <p className="mt-2 text-sm font-medium text-white/85 transition group-hover:text-primary-deep/70">
                   {category.jobs} active and recurring openings
                 </p>
               </a>
@@ -1379,23 +1408,30 @@ function ProcessSection() {
 }
 
 function CaseStudies() {
+  const [flippedStory, setFlippedStory] = useState<string | null>(null);
   const stories = [
     {
       sector: "Healthcare",
       title: "Nurses placed into UAE hospital teams",
       body: "Document preparation, interview coaching and visa guidance helped candidates move with confidence.",
+      detail:
+        "Candidates received support checking professional documents, preparing for hospital interviews and understanding each visa milestone before travel.",
       tone: "border-sky-300/45 bg-sky-400/12",
     },
     {
       sector: "Construction",
       title: "Skilled trades matched with Qatar contractors",
       body: "Verified project roles gave candidates clear contract expectations before mobilisation.",
+      detail:
+        "Trade experience was matched to specific project needs, with salary, accommodation and mobilisation requirements explained before commitment.",
       tone: "border-amber-300/45 bg-amber-300/12",
     },
     {
       sector: "Hospitality",
       title: "Hotel teams staffed for premium Gulf properties",
       body: "Food service, housekeeping and kitchen candidates were screened for role fit and readiness.",
+      detail:
+        "Candidates were guided through practical role expectations, presentation standards and employer interviews for premium hospitality teams.",
       tone: "border-violet-300/45 bg-violet-300/12",
     },
   ];
@@ -1410,25 +1446,49 @@ function CaseStudies() {
           dark
         />
         <div className="mt-10 grid gap-4 md:grid-cols-3">
-          {stories.map((story) => (
-            <article
-              key={story.title}
-              className={`border p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] ${story.tone}`}
-            >
-              <p className="text-xs font-bold uppercase tracking-[0.16em] text-accent-gold">
-                {story.sector}
-              </p>
-              <h3 className="mt-8 font-display text-2xl font-bold">{story.title}</h3>
-              <p className="mt-4 leading-7 text-white/62">{story.body}</p>
-              <a
-                href="/success"
-                className="mt-8 inline-flex items-center gap-2 font-bold text-accent-gold"
-              >
-                Read more
-                <ArrowRight className="size-4" />
-              </a>
-            </article>
-          ))}
+          {stories.map((story) => {
+            const isFlipped = flippedStory === story.title;
+            return (
+              <article key={story.title} className="min-h-80 [perspective:1000px]">
+                <div
+                  className="relative size-full min-h-80 transition-transform duration-500 [transform-style:preserve-3d]"
+                  style={{ transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)" }}
+                >
+                  <div
+                    className={`absolute inset-0 border p-6 [backface-visibility:hidden] ${story.tone}`}
+                  >
+                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-accent-gold">
+                      {story.sector}
+                    </p>
+                    <h3 className="mt-8 font-display text-2xl font-bold">{story.title}</h3>
+                    <p className="mt-4 leading-7 text-white/70">{story.body}</p>
+                    <button
+                      type="button"
+                      onClick={() => setFlippedStory(story.title)}
+                      className="mt-8 inline-flex items-center gap-2 font-bold text-accent-gold"
+                    >
+                      Read more <ArrowRight className="size-4" />
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setFlippedStory(null)}
+                    className={`absolute inset-0 border p-6 text-left [backface-visibility:hidden] [transform:rotateY(180deg)] ${story.tone}`}
+                    aria-label={`Show less about ${story.title}`}
+                  >
+                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-accent-gold">
+                      More information
+                    </p>
+                    <h3 className="mt-6 font-display text-2xl font-bold">{story.title}</h3>
+                    <p className="mt-4 leading-7 text-white/85">{story.detail}</p>
+                    <span className="mt-8 inline-flex font-bold text-accent-gold">
+                      Tap to return
+                    </span>
+                  </button>
+                </div>
+              </article>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -1452,27 +1512,29 @@ function KuwaitSuccessStory() {
                 documents to arrival.
               </p>
 
-              <div className="mt-12 flex flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
+              <div className="mt-12 flex items-center justify-between gap-4 sm:gap-8">
                 <div className="flex items-center gap-4">
                   <div className="grid size-16 shrink-0 place-items-center rounded-full bg-primary text-base font-black text-white">
                     JM
                   </div>
                   <div>
-                    <p className="font-display text-lg font-black text-primary-deep">James Mwangi</p>
+                    <p className="font-display text-lg font-black text-primary-deep">
+                      James Mwangi
+                    </p>
                     <p className="mt-1 text-sm font-semibold text-primary-deep/78">
                       Logistics worker, Kuwait
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-start sm:justify-end">
+                <div className="flex shrink-0 items-center justify-end">
                   <img
                     src={nicksLogo}
                     alt="NICKS Recruitment Agency"
                     onError={showLogoFallback}
                     loading="lazy"
                     decoding="async"
-                    className="h-16 w-auto object-contain sm:h-20"
+                    className="h-12 w-auto object-contain sm:h-20"
                   />
                   <span className="hidden font-display text-2xl font-black text-primary">
                     NICKS
@@ -1629,8 +1691,8 @@ function JobExplorer({ initialDestination }: { initialDestination: string }) {
 
   return (
     <div className="mt-10">
-      <div className="grid gap-3 border-2 border-primary/12 bg-surface p-4 md:grid-cols-[1fr_220px_220px_auto]">
-        <label className="relative block">
+      <div className="grid grid-cols-2 gap-3 border-2 border-primary/12 bg-surface p-4 md:grid-cols-[1fr_220px_220px_auto]">
+        <label className="relative col-span-2 block md:col-span-1">
           <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-primary" />
           <input
             value={query}
@@ -1642,7 +1704,7 @@ function JobExplorer({ initialDestination }: { initialDestination: string }) {
         <select
           value={destination}
           onChange={(event) => setDestination(event.target.value)}
-          className="h-12 rounded-full border border-border bg-background px-4 text-sm font-bold outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
+          className="h-12 min-w-0 w-full rounded-full border border-border bg-background px-3 text-sm font-bold outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10 sm:px-4"
           aria-label="Filter by destination"
         >
           <option value="">All destinations</option>
@@ -1655,7 +1717,7 @@ function JobExplorer({ initialDestination }: { initialDestination: string }) {
         <select
           value={category}
           onChange={(event) => setCategory(event.target.value)}
-          className="h-12 rounded-full border border-border bg-background px-4 text-sm font-bold outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
+          className="h-12 min-w-0 w-full rounded-full border border-border bg-background px-3 text-sm font-bold outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10 sm:px-4"
           aria-label="Filter by sector"
         >
           <option value="">All sectors</option>
@@ -1672,7 +1734,7 @@ function JobExplorer({ initialDestination }: { initialDestination: string }) {
             setDestination("");
             setCategory("");
           }}
-          className="h-12 rounded-full bg-primary px-5 text-sm font-black text-white transition hover:bg-primary-deep"
+          className="col-span-2 h-12 w-fit min-w-28 justify-self-center rounded-full bg-primary px-5 text-sm font-black text-white transition hover:bg-primary-deep md:col-span-1 md:w-auto md:min-w-0 md:justify-self-stretch"
         >
           Clear
         </button>
@@ -1829,26 +1891,34 @@ function AboutPageMetrics() {
             <ArrowRight className="size-4" />
           </a>
         </div>
-        <div className="grid gap-x-10 gap-y-8 sm:grid-cols-2">
-          {stats.map((stat) => (
-            <div key={stat.label}>
-              <div className="font-display text-4xl font-black text-primary">{stat.value}</div>
-              <p className="mt-2 text-xs font-black uppercase tracking-[0.12em] text-primary-deep/62">
-                {stat.label}
+        <div>
+          <h2 className="font-display text-3xl font-bold text-foreground">Key facts</h2>
+          <div className="mt-6 grid grid-cols-2 gap-4 sm:gap-6">
+            {stats.map((stat) => (
+              <div
+                key={stat.label}
+                className="mx-auto flex aspect-square w-full max-w-32 flex-col items-center justify-center rounded-full border border-primary bg-background p-3 text-center sm:max-w-36"
+              >
+                <div className="font-display text-xl font-black text-primary sm:text-2xl">
+                  <StatValue value={stat.value} />
+                </div>
+                <p className="mt-1 max-w-28 text-xs font-semibold leading-tight text-foreground/75">
+                  {stat.label}
+                </p>
+              </div>
+            ))}
+            <div className="mx-auto flex aspect-square w-full max-w-32 flex-col items-center justify-center rounded-full border border-primary bg-background p-3 text-center sm:max-w-36">
+              <div className="font-display text-xl font-black text-primary sm:text-2xl">6</div>
+              <p className="mt-1 max-w-28 text-xs font-semibold leading-tight text-foreground/75">
+                Gulf destinations
               </p>
             </div>
-          ))}
-          <div>
-            <div className="font-display text-4xl font-black text-primary">6</div>
-            <p className="mt-2 text-xs font-black uppercase tracking-[0.12em] text-primary-deep/62">
-              Gulf destinations
-            </p>
-          </div>
-          <div>
-            <div className="font-display text-4xl font-black text-primary">24/7</div>
-            <p className="mt-2 text-xs font-black uppercase tracking-[0.12em] text-primary-deep/62">
-              WhatsApp enquiry path
-            </p>
+            <div className="mx-auto flex aspect-square w-full max-w-32 flex-col items-center justify-center rounded-full border border-primary bg-background p-3 text-center sm:max-w-36">
+              <div className="font-display text-xl font-black text-primary sm:text-2xl">24/7</div>
+              <p className="mt-1 max-w-28 text-xs font-semibold leading-tight text-foreground/75">
+                WhatsApp enquiry path
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -1914,7 +1984,7 @@ function AboutPageOperate() {
         onError={(event) => setFallbackImage(event, heroDriverFallbackImage)}
         loading="lazy"
         decoding="async"
-        className="h-80 w-full object-cover object-[center_18%] lg:h-full"
+        className="order-first h-80 w-full object-cover object-[center_18%] lg:order-none lg:h-full"
       />
     </section>
   );
@@ -1924,7 +1994,7 @@ function AboutFeatureImage() {
   return (
     <section id="candidate-support" className="bg-background px-6 py-14 sm:px-8 lg:px-12">
       <div className="mx-auto max-w-6xl">
-        <div className="relative overflow-hidden bg-primary-deep shadow-elegant">
+        <div className="overflow-hidden bg-primary-deep shadow-elegant">
           <img
             src={aboutWorkImage}
             alt="African professionals celebrating successful preparation and placement"
@@ -1933,7 +2003,7 @@ function AboutFeatureImage() {
             decoding="async"
             className="aspect-[16/8] w-full object-cover object-[center_18%]"
           />
-          <div className="absolute inset-x-0 bottom-0 grid gap-4 bg-primary-deep/92 p-6 text-white sm:grid-cols-[1fr_auto] sm:items-end">
+          <div className="grid gap-4 bg-primary-deep p-6 text-white sm:grid-cols-[1fr_auto] sm:items-end">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-accent-gold">
                 NICKS Recruitment Agency
@@ -1977,6 +2047,7 @@ function AboutBusinessSection() {
 function AboutReadinessSection() {
   const [destinationIndex, setDestinationIndex] = useState(0);
   const [supportIndex, setSupportIndex] = useState(0);
+  const [flippedSupportCard, setFlippedSupportCard] = useState<string | null>(null);
   const visibleDestinations = [0, 1].map(
     (offset) => countries[(destinationIndex + offset) % countries.length],
   );
@@ -1993,10 +2064,12 @@ function AboutReadinessSection() {
   };
 
   const showPreviousSupportCards = () => {
+    setFlippedSupportCard(null);
     setSupportIndex((current) => (current - 2 + aboutImpactCards.length) % aboutImpactCards.length);
   };
 
   const showNextSupportCards = () => {
+    setFlippedSupportCard(null);
     setSupportIndex((current) => (current + 2) % aboutImpactCards.length);
   };
 
@@ -2074,18 +2147,25 @@ function AboutReadinessSection() {
         </div>
         <div>
           <h3 className="font-display text-3xl font-bold text-foreground">Key facts</h3>
-          <div className="mt-8 grid gap-8 sm:grid-cols-2">
+          <div className="mt-6 grid grid-cols-2 gap-4 sm:gap-6">
             {stats.map((stat) => (
-              <div key={stat.label}>
-                <div className="font-display text-5xl font-black text-primary">{stat.value}</div>
-                <p className="mt-2 text-sm font-semibold text-foreground/70">{stat.label}</p>
+              <div
+                key={stat.label}
+                className="mx-auto flex aspect-square w-full max-w-32 flex-col items-center justify-center rounded-full border border-primary bg-background p-3 text-center sm:max-w-36"
+              >
+                <div className="font-display text-xl font-black text-primary sm:text-2xl">
+                  <StatValue value={stat.value} />
+                </div>
+                <p className="mt-1 max-w-28 text-xs font-semibold leading-tight text-foreground/75 sm:text-sm">
+                  {stat.label}
+                </p>
               </div>
             ))}
           </div>
           <div className="mt-12">
             <div className="flex items-center justify-between gap-4">
               <h3 className="font-display text-3xl font-bold text-foreground">Destinations</h3>
-              <div className="flex gap-3 text-primary">
+              <div className="hidden gap-3 text-primary sm:flex">
                 <button
                   type="button"
                   onClick={showPreviousDestinations}
@@ -2132,6 +2212,24 @@ function AboutReadinessSection() {
                 </a>
               ))}
             </div>
+            <div className="mt-6 flex justify-center gap-4 text-primary sm:hidden">
+              <button
+                type="button"
+                onClick={showPreviousDestinations}
+                className="grid size-12 place-items-center rounded-full border border-primary/25"
+                aria-label="Previous destinations"
+              >
+                <ChevronDown className="size-5 rotate-90" />
+              </button>
+              <button
+                type="button"
+                onClick={showNextDestinations}
+                className="grid size-12 place-items-center rounded-full border border-primary/25"
+                aria-label="Next destinations"
+              >
+                <ChevronDown className="size-5 -rotate-90" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -2162,33 +2260,58 @@ function AboutReadinessSection() {
         </div>
         <div>
           <div className="grid gap-5 sm:grid-cols-2">
-            {visibleSupportCards.map((card) => (
-              <article key={card.title} className="border border-border bg-background">
-                <img
-                  src={card.supportImage}
-                  alt=""
-                  onError={(event) => setFallbackImage(event, card.fallback)}
-                  loading="lazy"
-                  decoding="async"
-                  className="h-44 w-full object-cover object-[center_16%]"
-                />
-                <div className="p-5">
-                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">
-                    Candidate support
-                  </p>
-                  <h3 className="mt-3 font-display text-xl font-bold leading-tight">
-                    {card.title}
-                  </h3>
-                  <a
-                    href="/how-it-works"
-                    className="mt-4 inline-flex items-center gap-2 text-sm font-black text-primary"
+            {visibleSupportCards.map((card) => {
+              const isFlipped = flippedSupportCard === card.title;
+              return (
+                <article key={card.title} className="min-h-80 [perspective:1000px]">
+                  <div
+                    className="relative size-full min-h-80 transition-transform duration-500 [transform-style:preserve-3d]"
+                    style={{ transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)" }}
                   >
-                    Read more
-                    <ArrowRight className="size-4" />
-                  </a>
-                </div>
-              </article>
-            ))}
+                    <div className="absolute inset-0 border border-border bg-background [backface-visibility:hidden]">
+                      <img
+                        src={card.supportImage}
+                        alt=""
+                        onError={(event) => setFallbackImage(event, card.fallback)}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-44 w-full object-cover object-[center_16%]"
+                      />
+                      <div className="p-5">
+                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">
+                          Candidate support
+                        </p>
+                        <h3 className="mt-3 font-display text-xl font-bold leading-tight">
+                          {card.title}
+                        </h3>
+                        <button
+                          type="button"
+                          onClick={() => setFlippedSupportCard(card.title)}
+                          className="mt-4 inline-flex items-center gap-2 text-sm font-black text-primary"
+                        >
+                          Read more <ArrowRight className="size-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setFlippedSupportCard(null)}
+                      className="absolute inset-0 border border-primary/25 bg-primary-deep p-6 text-left text-white [backface-visibility:hidden] [transform:rotateY(180deg)]"
+                      aria-label={`Show less about ${card.title}`}
+                    >
+                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-accent-gold">
+                        Candidate support
+                      </p>
+                      <h3 className="mt-5 font-display text-2xl font-bold">{card.title}</h3>
+                      <p className="mt-5 leading-7 text-white/85">{card.detail}</p>
+                      <span className="mt-7 inline-flex text-sm font-black text-accent-gold">
+                        Tap to return
+                      </span>
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
           </div>
           <div className="mt-6 flex items-center gap-4 text-primary">
             <button
@@ -2247,6 +2370,7 @@ function AboutJoinSection({ image, fallback }: { image: string; fallback: string
 
 function AboutImpactSection() {
   const [impactIndex, setImpactIndex] = useState(0);
+  const [flippedImpactCard, setFlippedImpactCard] = useState<string | null>(null);
   const orderedImpactCards = aboutImpactCards.map(
     (_, offset) => aboutImpactCards[(impactIndex + offset) % aboutImpactCards.length],
   );
@@ -2254,44 +2378,99 @@ function AboutImpactSection() {
   return (
     <section className="bg-background px-6 py-16 sm:px-8 lg:px-12">
       <div className="mx-auto max-w-7xl">
-        <h2 className="font-display text-3xl font-bold text-foreground">Our impact</h2>
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {orderedImpactCards.map((card) => (
-            <article key={card.title} className="border border-border bg-surface">
-              <img
-                src={card.image}
-                alt=""
-                onError={(event) => setFallbackImage(event, card.fallback)}
-                loading="lazy"
-                decoding="async"
-                className="h-40 w-full object-cover object-[center_16%]"
-              />
-              <div className="p-5">
-                <p className="text-[11px] font-black uppercase tracking-[0.14em] text-primary">
-                  NICKS News
-                </p>
-                <h3 className="mt-3 min-h-16 font-display text-xl font-bold leading-tight text-foreground">
-                  {card.summary}
-                </h3>
-                <a
-                  href="/success"
-                  className="mt-5 inline-flex items-center gap-2 text-sm font-black text-primary"
-                >
-                  Read more
-                  <ArrowRight className="size-4" />
-                </a>
-              </div>
-            </article>
-          ))}
+        <div className="flex items-center justify-between gap-6">
+          <h2 className="font-display text-3xl font-bold text-foreground">Our impact</h2>
+          <div className="hidden items-center gap-4 text-primary lg:flex">
+            <button
+              type="button"
+              onClick={() => {
+                setFlippedImpactCard(null);
+                setImpactIndex(
+                  (current) => (current - 1 + aboutImpactCards.length) % aboutImpactCards.length,
+                );
+              }}
+              className="grid size-10 place-items-center rounded-full border border-primary/25"
+              aria-label="Previous impact story"
+            >
+              <ChevronDown className="size-4 rotate-90" />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setFlippedImpactCard(null);
+                setImpactIndex((current) => (current + 1) % aboutImpactCards.length);
+              }}
+              className="grid size-10 place-items-center rounded-full border border-primary/25"
+              aria-label="Next impact story"
+            >
+              <ChevronDown className="size-4 -rotate-90" />
+            </button>
+            <div className="ml-3 h-px w-24 bg-primary" />
+          </div>
         </div>
-        <div className="mt-8 flex items-center gap-4 text-primary">
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {orderedImpactCards.map((card) => {
+            const isFlipped = flippedImpactCard === card.title;
+            return (
+              <article key={card.title} className="min-h-80 [perspective:1000px]">
+                <div
+                  className="relative size-full min-h-80 transition-transform duration-500 [transform-style:preserve-3d]"
+                  style={{ transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)" }}
+                >
+                  <div className="absolute inset-0 border border-border bg-surface [backface-visibility:hidden]">
+                    <img
+                      src={card.image}
+                      alt=""
+                      onError={(event) => setFallbackImage(event, card.fallback)}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-40 w-full object-cover object-[center_16%]"
+                    />
+                    <div className="p-5">
+                      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-primary">
+                        NICKS News
+                      </p>
+                      <h3 className="mt-3 min-h-16 font-display text-xl font-bold leading-tight text-foreground">
+                        {card.summary}
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={() => setFlippedImpactCard(card.title)}
+                        className="mt-5 inline-flex items-center gap-2 text-sm font-black text-primary"
+                      >
+                        Read more <ArrowRight className="size-4" />
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setFlippedImpactCard(null)}
+                    className="absolute inset-0 border border-primary/25 bg-primary-deep p-6 text-left text-white [backface-visibility:hidden] [transform:rotateY(180deg)]"
+                    aria-label={`Show less about ${card.title}`}
+                  >
+                    <p className="text-[11px] font-black uppercase tracking-[0.14em] text-accent-gold">
+                      Our impact
+                    </p>
+                    <h3 className="mt-5 font-display text-2xl font-bold">{card.title}</h3>
+                    <p className="mt-5 leading-7 text-white/85">{card.detail}</p>
+                    <span className="mt-7 inline-flex text-sm font-black text-accent-gold">
+                      Tap to return
+                    </span>
+                  </button>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+        <div className="mt-8 flex items-center justify-center gap-4 text-primary lg:hidden">
           <button
             type="button"
-            onClick={() =>
+            onClick={() => {
+              setFlippedImpactCard(null);
               setImpactIndex(
                 (current) => (current - 1 + aboutImpactCards.length) % aboutImpactCards.length,
-              )
-            }
+              );
+            }}
             className="grid size-8 place-items-center rounded-full border border-primary/25"
             aria-label="Previous impact story"
           >
@@ -2299,13 +2478,15 @@ function AboutImpactSection() {
           </button>
           <button
             type="button"
-            onClick={() => setImpactIndex((current) => (current + 1) % aboutImpactCards.length)}
+            onClick={() => {
+              setFlippedImpactCard(null);
+              setImpactIndex((current) => (current + 1) % aboutImpactCards.length);
+            }}
             className="grid size-8 place-items-center rounded-full border border-primary/25"
             aria-label="Next impact story"
           >
             <ChevronDown className="size-4 -rotate-90" />
           </button>
-          <div className="ml-8 h-px w-24 bg-primary" />
         </div>
       </div>
     </section>
@@ -2425,6 +2606,16 @@ export function ContactPage() {
             className="size-full object-cover object-[center_16%] [clip-path:polygon(22%_0,100%_0,100%_100%,0_100%)]"
           />
         </div>
+        <div className="relative h-[min(72vw,22rem)] overflow-hidden sm:h-96 lg:hidden">
+          <img
+            src={contactHeroImage}
+            alt="NICKS recruitment support team"
+            onError={(event) => setFallbackImage(event, aboutWorkFallbackImage)}
+            loading="eager"
+            decoding="async"
+            className="size-full object-cover object-[center_16%]"
+          />
+        </div>
         <div className="relative mx-auto max-w-7xl px-6 py-16 sm:px-8 lg:px-12">
           <div className="text-xs font-bold text-white/72">
             <a href="/" className="hover:text-accent-gold">
@@ -2529,13 +2720,52 @@ export function ContactPage() {
 }
 
 function TrustStrip() {
+  const [mobileEmployerStart, setMobileEmployerStart] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setMobileEmployerStart((current) => (current + 1) % employers.length);
+    }, 4000);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const mobileEmployers = [0, 1, 2].map(
+    (offset) => employers[(mobileEmployerStart + offset) % employers.length],
+  );
+
   return (
     <section className="border-y border-border bg-surface py-12">
       <p className="mb-8 text-center text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
         Trusted by leading Gulf enterprises
       </p>
       <div className="relative overflow-hidden">
-        <div className="animate-marquee flex w-max gap-6 whitespace-nowrap px-8">
+        <div
+          key={mobileEmployerStart}
+          className="trust-mobile-slide grid grid-cols-3 gap-2 px-4 sm:hidden"
+        >
+          {mobileEmployers.map((employer) => (
+            <a
+              key={employer.name}
+              href="/jobs"
+              className="grid h-16 min-w-0 place-items-center border border-border bg-background px-2"
+              aria-label={`${employer.name} opportunities`}
+            >
+              <img
+                src={employer.logo}
+                alt={employer.name}
+                loading="lazy"
+                decoding="async"
+                onError={showLogoFallback}
+                className="max-h-8 max-w-full object-contain grayscale"
+              />
+              <span className="hidden text-center font-display text-xs font-black text-primary-deep/55">
+                {employer.name}
+              </span>
+            </a>
+          ))}
+        </div>
+        <div className="animate-marquee hidden w-max gap-6 whitespace-nowrap px-8 sm:flex">
           {[...employers, ...employers].map((employer, i) => (
             <a
               key={`${employer.name}-${i}`}
@@ -2572,17 +2802,17 @@ function CTASection() {
             Send your profession, preferred country and CV status.
           </h2>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-nowrap gap-2 sm:gap-3">
           <a
             href={whatsappUrl("Hello NICKS, I am ready to start my Gulf job application.")}
-            className="inline-flex items-center gap-2 rounded-md bg-white px-6 py-3 text-sm font-bold text-primary-deep transition hover:bg-surface"
+            className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-3 text-sm font-bold text-primary-deep transition hover:bg-surface sm:px-6"
           >
-            Enquire on WhatsApp
+            Enquire
             <WhatsAppIcon className="size-4" />
           </a>
           <a
             href="/jobs"
-            className="inline-flex items-center gap-2 rounded-md border border-white/25 bg-white/10 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/20"
+            className="inline-flex items-center gap-2 rounded-md border border-white/25 bg-white/10 px-4 py-3 text-sm font-bold text-white transition hover:bg-white/20 sm:px-6"
           >
             View Jobs
             <Search className="size-4" />
@@ -2604,14 +2834,13 @@ function Footer() {
     "Kenya",
     "United Kingdom",
     "South Africa",
-    "Rwanda",
     "India",
     "Pakistan",
     "Philippines",
   ];
 
   return (
-    <footer className="bg-surface text-primary-deep">
+    <footer data-site-footer className="bg-surface text-primary-deep">
       <div className="mx-auto grid max-w-5xl gap-12 px-6 py-12 sm:px-8 lg:grid-cols-[0.65fr_1.35fr] lg:px-12">
         <div className="border-r-0 border-primary/30 lg:border-r lg:pr-12">
           <h4 className="font-display text-lg font-bold">Contact us</h4>
@@ -2679,10 +2908,12 @@ function Footer() {
             "Terms",
             "Candidate guidance",
             "Employer services",
-            "NICKS Recruitment Agency",
           ].map((item) => (
             <span key={item}>{item}</span>
           ))}
+          <a href={`tel:+${whatsappNumber}`} className="transition hover:text-primary">
+            Call: +254 746 030 545
+          </a>
           <span className="ml-auto">{"\u00a9"} Nicks Agency 2026</span>
         </div>
       </div>
