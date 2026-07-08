@@ -2048,29 +2048,25 @@ function AboutReadinessSection() {
   const [destinationIndex, setDestinationIndex] = useState(0);
   const [supportIndex, setSupportIndex] = useState(0);
   const [flippedSupportCard, setFlippedSupportCard] = useState<string | null>(null);
-  const visibleDestinations = [0, 1].map(
-    (offset) => countries[(destinationIndex + offset) % countries.length],
-  );
-  const visibleSupportCards = [0, 1].map(
-    (offset) => aboutImpactCards[(supportIndex + offset) % aboutImpactCards.length],
-  );
+  const visibleDestination = countries[destinationIndex];
+  const visibleSupportCard = aboutImpactCards[supportIndex];
 
   const showPreviousDestinations = () => {
-    setDestinationIndex((current) => (current - 2 + countries.length) % countries.length);
+    setDestinationIndex((current) => (current - 1 + countries.length) % countries.length);
   };
 
   const showNextDestinations = () => {
-    setDestinationIndex((current) => (current + 2) % countries.length);
+    setDestinationIndex((current) => (current + 1) % countries.length);
   };
 
   const showPreviousSupportCards = () => {
     setFlippedSupportCard(null);
-    setSupportIndex((current) => (current - 2 + aboutImpactCards.length) % aboutImpactCards.length);
+    setSupportIndex((current) => (current - 1 + aboutImpactCards.length) % aboutImpactCards.length);
   };
 
   const showNextSupportCards = () => {
     setFlippedSupportCard(null);
-    setSupportIndex((current) => (current + 2) % aboutImpactCards.length);
+    setSupportIndex((current) => (current + 1) % aboutImpactCards.length);
   };
 
   return (
@@ -2184,33 +2180,33 @@ function AboutReadinessSection() {
                 </button>
               </div>
             </div>
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              {visibleDestinations.map((country) => (
-                <a
-                  key={country.name}
-                  href={`/jobs?destination=${encodeURIComponent(country.name)}`}
-                  className="group border border-border bg-surface p-6 transition hover:-translate-y-1 hover:border-accent-gold hover:shadow-gold"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="grid size-12 place-items-center rounded-full bg-primary-deep font-bold text-white">
-                      {country.flag}
-                    </span>
-                    <MapPin className="size-5 text-primary transition group-hover:text-accent-gold" />
+            <div className="mt-6">
+              <a
+                key={visibleDestination.name}
+                href={`/jobs?destination=${encodeURIComponent(visibleDestination.name)}`}
+                className="group block border border-border bg-surface p-6 transition hover:-translate-y-1 hover:border-accent-gold hover:shadow-gold"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="grid size-12 place-items-center rounded-full bg-primary-deep font-bold text-white">
+                    {visibleDestination.flag}
+                  </span>
+                  <MapPin className="size-5 text-primary transition group-hover:text-accent-gold" />
+                </div>
+                <h4 className="mt-6 font-display text-2xl font-bold">{visibleDestination.name}</h4>
+                <p className="mt-4 text-sm leading-6 text-muted-foreground">
+                  {visibleDestination.roles}
+                </p>
+                <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Jobs</p>
+                    <p className="font-bold">{visibleDestination.jobs}</p>
                   </div>
-                  <h4 className="mt-6 font-display text-2xl font-bold">{country.name}</h4>
-                  <p className="mt-4 text-sm leading-6 text-muted-foreground">{country.roles}</p>
-                  <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                      <p className="text-muted-foreground">Jobs</p>
-                      <p className="font-bold">{country.jobs}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">From</p>
-                      <p className="font-bold">{country.salary}</p>
-                    </div>
+                  <div>
+                    <p className="text-muted-foreground">From</p>
+                    <p className="font-bold">{visibleDestination.salary}</p>
                   </div>
-                </a>
-              ))}
+                </div>
+              </a>
             </div>
             <div className="mt-6 flex justify-center gap-4 text-primary sm:hidden">
               <button
@@ -2259,8 +2255,9 @@ function AboutReadinessSection() {
           </a>
         </div>
         <div>
-          <div className="grid gap-5 sm:grid-cols-2">
-            {visibleSupportCards.map((card) => {
+          <div>
+            {(() => {
+              const card = visibleSupportCard;
               const isFlipped = flippedSupportCard === card.title;
               return (
                 <article key={card.title} className="min-h-80 [perspective:1000px]">
@@ -2311,7 +2308,7 @@ function AboutReadinessSection() {
                   </div>
                 </article>
               );
-            })}
+            })()}
           </div>
           <div className="mt-6 flex items-center gap-4 text-primary">
             <button
