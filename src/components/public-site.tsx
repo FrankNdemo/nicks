@@ -15,6 +15,7 @@ import {
   Menu,
   MessageCircle,
   Plane,
+  Plus,
   Search,
   ShieldCheck,
   Star,
@@ -532,6 +533,37 @@ const heroSearchItems = [
   },
 ];
 
+const faqItems = [
+  {
+    question: "What does NICKS Recruitment Agency offer?",
+    answer: heroSearchItems[0].answer,
+  },
+  {
+    question: "How does NICKS support employers with staffing?",
+    answer: heroSearchItems[1].answer,
+  },
+  {
+    question: "What support do candidates receive before travel?",
+    answer: heroSearchItems[2].answer,
+  },
+  {
+    question: "How does the recruitment process work?",
+    answer: heroSearchItems[3].answer,
+  },
+  {
+    question: "How can I find open Gulf jobs?",
+    answer: heroSearchItems[4].answer,
+  },
+  {
+    question: "Which Gulf destinations does NICKS support?",
+    answer: heroSearchItems[5].answer,
+  },
+  {
+    question: "How do I contact NICKS about an enquiry?",
+    answer: heroSearchItems[6].answer,
+  },
+];
+
 const navItems = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
@@ -607,10 +639,10 @@ function Nav() {
 
     let lastScrollY = window.scrollY;
 
-    const closeOnScrollUp = () => {
+    const closeOnScroll = () => {
       const currentScrollY = window.scrollY;
 
-      if (currentScrollY < lastScrollY - 8) {
+      if (Math.abs(currentScrollY - lastScrollY) > 8) {
         setOpenMenu(null);
         setOpenMobileSubmenu(null);
       }
@@ -618,9 +650,9 @@ function Nav() {
       lastScrollY = currentScrollY;
     };
 
-    window.addEventListener("scroll", closeOnScrollUp, { passive: true });
+    window.addEventListener("scroll", closeOnScroll, { passive: true });
 
-    return () => window.removeEventListener("scroll", closeOnScrollUp);
+    return () => window.removeEventListener("scroll", closeOnScroll);
   }, [openMenu]);
 
   return (
@@ -2633,6 +2665,8 @@ export function SuccessPage() {
 }
 
 export function FaqsPage() {
+  const [openFaq, setOpenFaq] = useState<string | null>(faqItems[0].question);
+
   return (
     <PublicLayout>
       <PageHero
@@ -2643,33 +2677,49 @@ export function FaqsPage() {
         fallbackImage={aboutWorkFallbackImage}
       />
       <section className="bg-background px-6 py-16 sm:px-8 lg:px-12">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid gap-5 md:grid-cols-2">
-            {heroSearchItems.map((item) => (
-              <article key={item.title} className="border border-border bg-surface p-6">
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">
-                  {item.description}
-                </p>
-                <h2 className="mt-4 font-display text-2xl font-bold text-foreground">
-                  {item.title}
-                </h2>
-                <p className="mt-4 text-sm font-semibold leading-7 text-muted-foreground">
-                  {item.answer}
-                </p>
-                <div className="mt-5 flex flex-wrap gap-2">
-                  {item.links.map((link) => (
-                    <a
-                      key={`${item.title}-${link.href}-${link.label}`}
-                      href={link.href}
-                      className="inline-flex items-center gap-2 rounded-full border border-primary/20 px-4 py-2 text-xs font-black text-primary transition hover:bg-primary hover:text-white"
-                    >
-                      {link.label}
-                      <ArrowRight className="size-3.5" />
-                    </a>
-                  ))}
+        <div className="mx-auto max-w-6xl">
+          <h2 className="font-display text-4xl font-bold leading-tight text-foreground sm:text-5xl">
+            Got questions? We&apos;ve got answers!
+          </h2>
+          <div className="mt-12 border-t border-border">
+            {faqItems.map((item, index) => {
+              const isOpen = openFaq === item.question;
+
+              return (
+                <div key={item.question} className="border-b border-border">
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaq(isOpen ? null : item.question)}
+                    className="grid w-full grid-cols-[2.5rem_1fr_auto] items-center gap-4 py-7 text-left transition hover:text-primary sm:grid-cols-[3.25rem_1fr_auto]"
+                    aria-expanded={isOpen}
+                  >
+                    <span className="font-display text-lg font-bold text-muted-foreground">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span className="text-base font-semibold leading-7 text-foreground sm:text-lg">
+                      {item.question}
+                    </span>
+                    <Plus
+                      className={`size-6 text-muted-foreground transition ${
+                        isOpen ? "rotate-45 text-primary" : ""
+                      }`}
+                      strokeWidth={1.7}
+                    />
+                  </button>
+                  <div
+                    className={`grid transition-all duration-300 ${
+                      isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <p className="pb-7 pl-[calc(2.5rem+1rem)] text-sm font-semibold leading-7 text-muted-foreground sm:pl-[calc(3.25rem+1rem)] sm:text-base">
+                        {item.answer}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </article>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
