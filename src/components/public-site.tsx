@@ -21,6 +21,7 @@ import {
   Truck,
   Upload,
   Wrench,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -543,6 +544,7 @@ const navItems = [
     ],
   },
   { label: "Success", href: "/success" },
+  { label: "FAQs", href: "/faqs" },
   { label: "Contact Us", href: "/contact-us" },
 ];
 
@@ -598,6 +600,28 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
 
 function Nav() {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [openMobileSubmenu, setOpenMobileSubmenu] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (openMenu !== "site-menu") return;
+
+    let lastScrollY = window.scrollY;
+
+    const closeOnScrollUp = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY < lastScrollY - 8) {
+        setOpenMenu(null);
+        setOpenMobileSubmenu(null);
+      }
+
+      lastScrollY = currentScrollY;
+    };
+
+    window.addEventListener("scroll", closeOnScrollUp, { passive: true });
+
+    return () => window.removeEventListener("scroll", closeOnScrollUp);
+  }, [openMenu]);
 
   return (
     <nav className="relative z-50 w-full border-b border-border bg-white text-primary-deep">
@@ -672,7 +696,10 @@ function Nav() {
         </button>
         <button
           type="button"
-          onClick={() => setOpenMenu(openMenu === "site-menu" ? null : "site-menu")}
+          onClick={() => {
+            setOpenMenu(openMenu === "site-menu" ? null : "site-menu");
+            setOpenMobileSubmenu(null);
+          }}
           className="inline-flex size-12 items-center justify-center rounded-full text-primary-deep transition hover:bg-primary/8 focus:bg-primary/8 focus:outline-none"
           aria-expanded={openMenu === "site-menu"}
           aria-label="Open navigation menu"
@@ -689,35 +716,72 @@ function Nav() {
           <SiteSearchPopup onNavigate={() => setOpenMenu(null)} />
         </div>
         <div
-          className={`absolute right-6 top-full z-50 w-[min(22rem,calc(100vw-3rem))] border border-border bg-white p-3 text-primary-deep shadow-elegant transition sm:right-8 lg:right-12 ${
+          className={`fixed inset-y-0 right-0 z-50 w-full overflow-y-auto border-l border-border bg-white p-5 text-primary-deep shadow-elegant transition duration-300 sm:max-w-sm ${
             openMenu === "site-menu"
-              ? "visible translate-y-0 opacity-100"
-              : "invisible -translate-y-2 opacity-0"
+              ? "visible translate-x-0 opacity-100"
+              : "invisible translate-x-full opacity-0"
           }`}
         >
-          {navItems.map((item) => (
-            <div key={item.href}>
-              <a
-                href={item.href}
-                onClick={() => setOpenMenu(null)}
-                className="flex items-center justify-between rounded-md px-4 py-3 text-sm font-black uppercase tracking-[0.08em] transition hover:bg-lavender"
-              >
-                {item.label}
-              </a>
-              {"children" in item
-                ? item.children.map((child) => (
-                    <a
-                      key={child.href}
-                      href={child.href}
-                      onClick={() => setOpenMenu(null)}
-                      className="ml-4 block rounded-md px-4 py-2 text-sm font-black uppercase tracking-[0.08em] text-primary-deep transition hover:bg-lavender hover:text-primary"
-                    >
-                      {child.label}
-                    </a>
-                  ))
-                : null}
-            </div>
-          ))}
+          <div className="mb-5 flex items-center justify-between border-b border-border pb-4">
+            <Logo />
+            <button
+              type="button"
+              onClick={() => {
+                setOpenMenu(null);
+                setOpenMobileSubmenu(null);
+              }}
+              className="grid size-11 place-items-center rounded-full text-primary-deep transition hover:bg-primary/8 focus:bg-primary/8 focus:outline-none"
+              aria-label="Close navigation menu"
+            >
+              <X className="size-6" strokeWidth={2.5} />
+            </button>
+          </div>
+          {navItems.map((item) => {
+            const hasChildren = "children" in item;
+            const isOpen = openMobileSubmenu === item.href;
+
+            return (
+              <div key={item.href}>
+                {hasChildren ? (
+                  <button
+                    type="button"
+                    onClick={() => setOpenMobileSubmenu(isOpen ? null : item.href)}
+                    className="flex w-full items-center justify-between rounded-md px-4 py-3 text-left text-sm font-black uppercase tracking-[0.08em] transition hover:bg-lavender"
+                    aria-expanded={isOpen}
+                  >
+                    <span>{item.label}</span>
+                    <ChevronDown className={`size-4 transition ${isOpen ? "rotate-180" : ""}`} />
+                  </button>
+                ) : (
+                  <a
+                    href={item.href}
+                    onClick={() => {
+                      setOpenMenu(null);
+                      setOpenMobileSubmenu(null);
+                    }}
+                    className="flex items-center justify-between rounded-md px-4 py-3 text-sm font-black uppercase tracking-[0.08em] transition hover:bg-lavender"
+                  >
+                    {item.label}
+                  </a>
+                )}
+                {hasChildren && isOpen
+                  ? item.children.map((child) => (
+                      <a
+                        key={child.href}
+                        href={child.href}
+                        onClick={() => {
+                          setOpenMenu(null);
+                          setOpenMobileSubmenu(null);
+                        }}
+                        className="ml-4 block rounded-md px-4 py-2 text-sm font-black uppercase tracking-[0.08em] text-primary-deep transition hover:bg-lavender hover:text-primary"
+                      >
+                        {child.label}
+                      </a>
+                    ))
+                  : null}
+              </div>
+            );
+          })}
         </div>
       </div>
     </nav>
@@ -2563,6 +2627,52 @@ export function SuccessPage() {
       <KuwaitSuccessStory />
       <SuccessGallery />
       <TrustStrip />
+      <CTASection />
+    </PublicLayout>
+  );
+}
+
+export function FaqsPage() {
+  return (
+    <PublicLayout>
+      <PageHero
+        eyebrow="FAQs"
+        title="Answers before you begin."
+        body="Find quick answers about NICKS services, candidate support, jobs, destinations and the recruitment process."
+        image={readinessImage}
+        fallbackImage={aboutWorkFallbackImage}
+      />
+      <section className="bg-background px-6 py-16 sm:px-8 lg:px-12">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-5 md:grid-cols-2">
+            {heroSearchItems.map((item) => (
+              <article key={item.title} className="border border-border bg-surface p-6">
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">
+                  {item.description}
+                </p>
+                <h2 className="mt-4 font-display text-2xl font-bold text-foreground">
+                  {item.title}
+                </h2>
+                <p className="mt-4 text-sm font-semibold leading-7 text-muted-foreground">
+                  {item.answer}
+                </p>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {item.links.map((link) => (
+                    <a
+                      key={`${item.title}-${link.href}-${link.label}`}
+                      href={link.href}
+                      className="inline-flex items-center gap-2 rounded-full border border-primary/20 px-4 py-2 text-xs font-black text-primary transition hover:bg-primary hover:text-white"
+                    >
+                      {link.label}
+                      <ArrowRight className="size-3.5" />
+                    </a>
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
       <CTASection />
     </PublicLayout>
   );

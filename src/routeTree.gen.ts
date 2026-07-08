@@ -13,6 +13,7 @@ import { Route as SuccessRouteImport } from './routes/success'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as FaqsRouteImport } from './routes/faqs'
 import { Route as DestinationsRouteImport } from './routes/destinations'
 import { Route as ContactUsRouteImport } from './routes/contact-us'
 import { Route as AboutRouteImport } from './routes/about'
@@ -36,6 +37,11 @@ const JobsRoute = JobsRouteImport.update({
 const HowItWorksRoute = HowItWorksRouteImport.update({
   id: '/how-it-works',
   path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaqsRoute = FaqsRouteImport.update({
+  id: '/faqs',
+  path: '/faqs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DestinationsRoute = DestinationsRouteImport.update({
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/contact-us': typeof ContactUsRoute
   '/destinations': typeof DestinationsRoute
+  '/faqs': typeof FaqsRoute
   '/how-it-works': typeof HowItWorksRoute
   '/jobs': typeof JobsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/contact-us': typeof ContactUsRoute
   '/destinations': typeof DestinationsRoute
+  '/faqs': typeof FaqsRoute
   '/how-it-works': typeof HowItWorksRoute
   '/jobs': typeof JobsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/contact-us': typeof ContactUsRoute
   '/destinations': typeof DestinationsRoute
+  '/faqs': typeof FaqsRoute
   '/how-it-works': typeof HowItWorksRoute
   '/jobs': typeof JobsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact-us'
     | '/destinations'
+    | '/faqs'
     | '/how-it-works'
     | '/jobs'
     | '/sitemap.xml'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact-us'
     | '/destinations'
+    | '/faqs'
     | '/how-it-works'
     | '/jobs'
     | '/sitemap.xml'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact-us'
     | '/destinations'
+    | '/faqs'
     | '/how-it-works'
     | '/jobs'
     | '/sitemap.xml'
@@ -128,6 +140,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   ContactUsRoute: typeof ContactUsRoute
   DestinationsRoute: typeof DestinationsRoute
+  FaqsRoute: typeof FaqsRoute
   HowItWorksRoute: typeof HowItWorksRoute
   JobsRoute: typeof JobsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -162,6 +175,13 @@ declare module '@tanstack/react-router' {
       path: '/how-it-works'
       fullPath: '/how-it-works'
       preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faqs': {
+      id: '/faqs'
+      path: '/faqs'
+      fullPath: '/faqs'
+      preLoaderRoute: typeof FaqsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/destinations': {
@@ -200,6 +220,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   ContactUsRoute: ContactUsRoute,
   DestinationsRoute: DestinationsRoute,
+  FaqsRoute: FaqsRoute,
   HowItWorksRoute: HowItWorksRoute,
   JobsRoute: JobsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
